@@ -1,9 +1,9 @@
-// archivo: api/ml-zona-lejana.js
-
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium-min';
+import chromium from '@sparticuz/chromium';
 
-export const config = { runtime: 'nodejs18.x', maxDuration: 20 };
+export const config = {
+  maxDuration: 20
+};
 
 export default async function handler(req, res) {
   const browser = await puppeteer.launch({
@@ -16,16 +16,17 @@ export default async function handler(req, res) {
   await page.goto('https://www.mercadolibre.com.ar/ayuda/25630', { waitUntil: 'networkidle0' });
 
   const valor = await page.evaluate(() => {
-    const tb = document.querySelector('tbody');
-    if (!tb) return null;
-    const tr = tb.querySelectorAll('tr')[2];
-    if (!tr) return null;
-    const td = tr.querySelectorAll('td')[1];
-    return td?.innerText?.trim() || null;
+    const tbody = document.querySelector('tbody');
+    const fila = tbody?.querySelectorAll('tr')[2];
+    const celda = fila?.querySelectorAll('td')[1];
+    return celda?.innerText?.trim() || null;
   });
 
   await browser.close();
 
-  if (!valor) return res.status(500).json({ error: 'Valor no encontrado' });
+  if (!valor) {
+    return res.status(500).json({ error: 'Valor no encontrado' });
+  }
+
   res.status(200).json({ valor });
 }
