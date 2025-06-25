@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "puppeteer-core": "^21.3.8",
-    "@sparticuz/chromium": "^111.0.0"
+    "@sparticuz/chromium": "^111.0.0",
+    "puppeteer-core": "^21.3.8"
   }
 }

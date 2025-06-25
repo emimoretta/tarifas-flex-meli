@@ -4,12 +4,14 @@ import chromium from '@sparticuz/chromium';
 export const config = { maxDuration: 20 };
 
 export default async function handler(req, res) {
-  let browser;
-
   try {
     const executablePath = await chromium.executablePath();
 
-    browser = await puppeteer.launch({
+    if (!executablePath) {
+      return res.status(500).json({ error: 'Chromium path no definido. ¿Se instaló correctamente @sparticuz/chromium?' });
+    }
+
+    const browser = await puppeteer.launch({
       args: chromium.args,
       executablePath,
       headless: chromium.headless,
@@ -23,22 +25,20 @@ export default async function handler(req, res) {
 
     const valor = await page.evaluate(() => {
       const tbody = document.querySelector('tbody');
-      if (!tbody) return null;
-      const filas = tbody.querySelectorAll('tr');
-      if (filas.length < 3) return null;
-      const celdas = filas[2].querySelectorAll('td');
-      if (celdas.length < 2) return null;
-      const texto = celdas[1].innerText.trim();
-      return parseFloat(texto.replace(/\./g, '').replace(',', '.').replace('$', '').trim());
+      const fila = tbody?.querySelectorAll('tr')[2];
+      const celda = fila?.querySelectorAll('td')[1];
+      const texto = celda?.innerText?.trim();
+      if (!texto) return null;
+      return parseFloat(texto.replace(/\./g, '').replace(',', '.').replace('$', ''));
     });
 
     await browser.close();
 
-    if (!valor) return res.status(500).json({ error: 'No se pudo extraer el valor.' });
+    if (!valor) return res.status(500).json({ error: 'No se encontró el valor esperado' });
 
     return res.status(200).json({ valor });
+
   } catch (e) {
-    if (browser) await browser.close();
     return res.status(500).json({ error: e.message });
   }
 }
