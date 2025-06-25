@@ -4,14 +4,16 @@ import chromium from '@sparticuz/chromium';
 export const config = { maxDuration: 20 };
 
 export default async function handler(req, res) {
+  let browser;
+
   try {
     const executablePath = await chromium.executablePath();
 
     if (!executablePath) {
-      return res.status(500).json({ error: 'Chromium path no definido. ¿Se instaló correctamente @sparticuz/chromium?' });
+      return res.status(500).json({ error: 'Chromium path is null. Check installation.' });
     }
 
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       args: chromium.args,
       executablePath,
       headless: chromium.headless,
@@ -37,8 +39,8 @@ export default async function handler(req, res) {
     if (!valor) return res.status(500).json({ error: 'No se encontró el valor esperado' });
 
     return res.status(200).json({ valor });
-
   } catch (e) {
+    if (browser) await browser.close();
     return res.status(500).json({ error: e.message });
   }
 }
