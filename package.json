@@ -1,6 +1,4 @@
 {
-  "name": "ml-zona-lejana-endpoint",
-  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "puppeteer-core": "^21.3.8",
